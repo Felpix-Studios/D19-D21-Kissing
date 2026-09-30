@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Lean / Lake build output and downloaded Mathlib (restore with `lake exe cache get`)
+.lake/
+lean/.lake/
+
+# Python
+__pycache__/
+*.pyc

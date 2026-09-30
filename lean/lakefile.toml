@@ -1,0 +1,25 @@
+name = "kissingD19D21"
+version = "0.1.0"
+defaultTargets = ["KissingCheck", "KissingD19D21"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.33.1"
+
+# Core-only construction and checker, compiled to native code so that
+# `native_decide` in the proof library runs the checker natively.
+[[lean_lib]]
+name = "KissingCheck"
+precompileModules = true
+
+[[lean_lib]]
+name = "KissingD19D21"
+
+[[lean_exe]]
+name = "dumprays"
+root = "DumpRays"
+
+[[lean_exe]]
+name = "checkall"
+root = "CheckAll"

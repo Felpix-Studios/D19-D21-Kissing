@@ -1,0 +1,5 @@
+The lower bound for the kissing number in 21 dimensions is 30761.
+
+The construction of this is as follows:
+
+G = extended Golay code: shifts of 1+t+t^5+t^6+t^7+t^9+t^11 on coordinates 1-23 (t^i at i+1), parity at 24. D = G restricted to 1-21. Base in R^21: roots ±2ei±2ej and odd-sign ±1 vectors on the 210 weight-8 words of G zero on 22-24. On Q = {3,6,10,11,16,18,20,21} delete the 31 patterns with x3 = 1, x6x10x18 = -1, x11x16x20x21 = 1, other than e3-e6-e10-e11-e16-e18-e20-e21. Add 3072 points (-1)^c times a positive weight vector, for c in the cosets c0+C of D, c0 = {4,5,6,8,10}, {1,4,7,8,9,10,11}, {1,2,6,7,8,10,12}, {1,5,6,7,9,11}, {1,2,4,5,7,12}, {2,4,6,9,11,12}, C the [21,9,6] subcode of D spanned by 1559917, 15163, 774651, 1540761, 485602, 408336, 678478, 1748752, 1231514 (bit j = coordinate j+1). The weights were tuned numerically: 384 vectors of 21 integers near 2*10^8, one per orbit of an order-8 sign group. They are in data/D21_30761_certificate.json (field "representatives"; the group generators are in "generators").
