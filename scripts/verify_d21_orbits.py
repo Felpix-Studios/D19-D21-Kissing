@@ -1,15 +1,25 @@
 #!/usr/bin/env python3
-"""Pure-Python exact orbit proof for the D21 construction (30761 points).
+"""Exact orbit-reduced check of the 30779-point D21 configuration, Python integers only.
 
-No NumPy, optimizer, network request, or floating-point arithmetic is used.
-The shortened binary code, odd fibers, removed points, norm comparisons,
-and coordinate-sign group are all reconstructed from the certificate.
+Usage: python3 scripts/verify_d21_orbits.py data/D21_30779_certificate.json
+
+No NumPy, optimizer or floating point. The octads, odd fibers, removed points
+and sign group are rebuilt from the certificate, and every pair that touches a
+new point is checked through the sign-group reduction.
+
+Names: H is the order-8 group Sigma_0 of the paper, K = <H, w> is Sigma, and T is
+the octad Q. The JSON lists 384 representatives under H. The script checks that
+the second 192 are the w-images (w = 14723) of the first 192, that w vanishes on T
+and meets every octad evenly, and that K has order 16; the pair check then runs on
+the 384 x H form, which is the same point set.
 """
 from __future__ import annotations
 import argparse, collections, itertools, json, math, time
 from pathlib import Path
 
 EXPONENTS=(0,1,5,6,7,9,11)
+W=14723
+T_ONE_BASED=(3,6,10,11,16,18,20,21)
 
 def xor_span(rows):
     out=[0]
@@ -61,16 +71,13 @@ def verify(certificate:Path, output:Path|None=None):
     # Complete odd fibers are invariant by binary orthogonality. The removed
     # set is a union of C-orbits, so the retained base is invariant as well.
     assert all(sign_change(r,c) in removed for r in removed for c in C)
-    if data.get('population')==30761:
-        # Check the listed deleted rows against the sign rule on the octad Q.
-        # Indices are 0-based here: Q = {3,6,10,11,16,18,20,21} in 1-based coordinates.
-        T=(2,5,9,10,15,17,19,20)
-        exceptional=tuple(1 if j==2 else -1 if j in T else 0 for j in range(21))
-        specified=set()
-        for v in odd_patterns(T):
-            if v[2]==1 and v[5]*v[9]*v[17]==-1 and v[10]*v[15]*v[19]*v[20]==1 and v!=exceptional:
-                specified.add(v)
-        assert len(specified)==31 and removed==specified
+    # The paper's form of the construction: 13 deletions on T, 192 reps x K.
+    T=tuple(i-1 for i in T_ONE_BASED);Tmask=sum(1<<j for j in T)
+    assert Tmask in supports and len(C)==8
+    assert len(removed)==13 and all(sum(1<<j for j,v in enumerate(r) if v)==Tmask for r in removed)
+    assert len(reps)==384 and reps[192:]==[sign_change(r,W) for r in reps[:192]]
+    assert W&Tmask==0 and all((W&o).bit_count()%2==0 for o in O) and W not in C
+    assert len(xor_span(gens+[W]))==16
     exception={sum(1<<j for j,v in enumerate(r) if v) for r in removed}
     remaining_patterns={o:[v for v in odd_patterns(supports[o]) if v not in removed] for o in exception}
     assert all(remaining_patterns[o] for o in exception)
@@ -120,6 +127,7 @@ def verify(certificate:Path, output:Path|None=None):
     N=base_count+len(reps)*len(C)
     if 'population' in data:assert int(data['population'])==N
     if 'dimension'in data:assert int(data['dimension'])==21
+    assert N==30779
     # All D21 roots remain. For i != j the roots 2e_i +/- 2e_j span e_i,
     # proving exactly dimension 21 without an approximate rank test.
     # All pair comparisons prove distinct normalized rays, including across
@@ -132,6 +140,7 @@ def verify(certificate:Path, output:Path|None=None):
             'retained_base':base_count,'removed_base_points':len(removed),
             'auxiliary_points':len(reps)*len(C),'representatives':len(reps),
             'sign_group_order':len(C),'sign_group_generators':gens,
+            'k_form':{'representatives':192,'extra_generator':W,'group_order':16},
             'direct_representative_orbit_products_checked':tested,
             'complete_base_fibers':210-len(exception),'incomplete_base_fibers':len(exception),
             'pair_coverage_by_proof':N*(N-1)//2,'gap_denominator':L,

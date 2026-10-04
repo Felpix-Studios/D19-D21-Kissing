@@ -31,7 +31,6 @@ Usage: python3 scripts/check_pairs.py RAYS [--n 21] [--expect-rows N] [--expect-
 Exit 0 and last line 'CHECK PASS' only if everything passes.
 """
 import argparse
-import hashlib
 import json
 import random
 import re
@@ -139,9 +138,7 @@ def main():
     n, L = args.n, args.gap_L
     t0 = time.time()
 
-    raw = open(args.rays, "rb").read()
-    sha = hashlib.sha256(raw).hexdigest()
-    print(f"input {args.rays}\nsha256 {sha}")
+    print(f"input {args.rays}")
     norms, rows = read_rays(args.rays, n)
     N = len(rows)
     print(f"rows {N}; every stated norm equals the sum of squares")
@@ -331,7 +328,7 @@ def main():
         if best_gap > Fraction(1, 10 ** 5) * Fraction(9, 10):
             die("float screen picked no pair with gap below 0.9e-5; the minimum is not certified")
 
-    out = {"input": args.rays, "sha256": sha, "rows": N, "n": n, "pairs": pairs_total, "violations": viol_total,
+    out = {"input": args.rays, "rows": N, "n": n, "pairs": pairs_total, "violations": viol_total,
            "contacts": contact_total, "distinct_directions": N, "rank_rows": picked, "rank_det": str(det),
            "norm_classes": K, "max_norm": str(maxnorm), "stats": stats, "largest_noncontact": report,
            "gap_L": L, "gapL_fail": gapL_fail,

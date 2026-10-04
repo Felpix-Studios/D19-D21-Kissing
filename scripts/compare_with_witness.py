@@ -24,7 +24,7 @@ def load(path, skip_norm=False):
 ok = True
 for name, lean, wit, skip, n in [
     ('D19', 'lean/out/lean_rays_d19.txt', 'data/D19_12268_rays.txt', True, 12268),
-    ('D21', 'lean/out/lean_rays_d21.txt', 'data/D21_30761_rays.txt', True, 30761),
+    ('D21', 'lean/out/lean_rays_d21.txt', 'data/D21_30779_rays.txt', True, 30779),
 ]:
     a = load(HERE / lean)
     b = load(HERE / wit, skip)

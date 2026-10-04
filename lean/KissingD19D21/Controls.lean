@@ -22,8 +22,8 @@ theorem d19_deleted_count : D19.deletedBase.size = 192 := by native_decide
 theorem d19_deleted_needed :
     D19.deletedBase.all (conflicts 19 D19.additions) = true := by native_decide
 
-theorem d21_deleted_count : D21.deletedBase.size = 31 := by native_decide
-/-- Each of the 31 deleted points conflicts with some new point. -/
+theorem d21_deleted_count : D21.deletedBase.size = 13 := by native_decide
+/-- Each of the 13 deleted points conflicts with some new point. -/
 theorem d21_deleted_needed :
     D21.deletedBase.all (conflicts 21 D21.newPoints) = true := by native_decide
 

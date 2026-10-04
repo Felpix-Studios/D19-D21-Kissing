@@ -1,9 +1,9 @@
 import KissingCheck.Basic
 import KissingCheck.D21Reps
 /-
-The 30761-point configuration in dimension 21. Coordinates are 1..21 in the
+The 30779-point configuration in dimension 21. Coordinates are 1..21 in the
 text and bits 0..20 here. Base rays have squared norm 8; the 3072 new rays
-are the sign changes of 384 integer representatives by a group of order 8.
+are the sign changes of 192 integer representatives by a group of order 16.
 -/
 namespace KissingCheck.D21
 
@@ -20,28 +20,47 @@ def G : Array Nat := span golayGens
 def octads : Array Nat :=
   G.filter fun w => popcount w == 8 && w &&& (7 <<< 21) == 0
 
-/-- The deleted octad T = {3,6,10,11,16,18,20,21}. -/
-def Tmask : Nat := mask1 [3, 6, 10, 11, 16, 18, 20, 21]
+/-- The octad T = {3,6,10,11,16,18,20,21} that carries the deletions. -/
+def Tcoords : List Nat := [3, 6, 10, 11, 16, 18, 20, 21]
+def Tmask : Nat := mask1 Tcoords
 
-/-- Entry at 1-indexed coordinate `i`. -/
-def at1 (v : Array Int) (i : Nat) : Int := v[i - 1]!
+/-- The 13 deleted sign patterns on T, signs in the order of `Tcoords`
+(the `removed_base_representatives` of `data/D21_30779_certificate.json`). -/
+def deletedSigns : List (List Int) := [
+  [1, 1, -1, 1, 1, 1, 1, 1],
+  [1, -1, 1, -1, -1, 1, 1, 1],
+  [1, 1, 1, 1, 1, -1, 1, 1],
+  [1, 1, -1, -1, 1, 1, -1, 1],
+  [1, -1, 1, 1, -1, 1, -1, 1],
+  [1, -1, -1, 1, -1, -1, -1, 1],
+  [1, 1, -1, -1, 1, 1, 1, -1],
+  [1, -1, 1, 1, -1, 1, 1, -1],
+  [1, 1, 1, -1, 1, -1, 1, -1],
+  [1, -1, -1, 1, -1, -1, 1, -1],
+  [1, 1, -1, 1, 1, 1, -1, -1],
+  [1, -1, 1, -1, -1, 1, -1, -1],
+  [1, 1, 1, 1, 1, -1, -1, -1]]
 
-/-- r* = e3 - e6 - e10 - e11 - e16 - e18 - e20 - e21, which is kept. -/
-def rstar : Array Int :=
-  (Array.range 21).map fun k =>
-    if k + 1 = 3 then 1 else if Tmask.testBit k then -1 else 0
+/-- The vector with the given signs on T and zeros elsewhere. -/
+def onT (s : List Int) : Array Int := Id.run do
+  let mut v := Array.replicate 21 (0 : Int)
+  for (i, a) in Tcoords.zip s do
+    v := v.set! (i - 1) a
+  return v
 
-/-- The 31 deleted points: odd sign patterns x on T with x3 = +1,
-x6 x10 x18 = -1 and x11 x16 x20 x21 = +1, other than r*. -/
+def deletedList : Array (Array Int) := (deletedSigns.map onT).toArray
+
+/-- `x` is one of the 13 deleted points (they all lie on T). -/
 def deleted (o : Nat) (x : Array Int) : Bool :=
-  o == Tmask && at1 x 3 == 1 && at1 x 6 * at1 x 10 * at1 x 18 == -1 &&
-    at1 x 11 * at1 x 16 * at1 x 20 * at1 x 21 == 1 && x != rstar
+  o == Tmask && deletedList.any (· == x)
 
 def base : Array (Array Int) :=
   roots 21 ++ octads.flatMap fun o => (oddSigns 21 o).filter (!deleted o ·)
 
-/-- The sign group H of order 8 (bit j changes the sign of coordinate j+1). -/
-def H : Array Nat := span [92361, 20689, 346115]
+/-- The sign group K of order 16 (bit j changes the sign of coordinate j+1).
+The first three generators span the order-8 group H (Σ₀ in the paper);
+w = 14723 is the fourth. K is Σ in the paper, and T is the octad Q. -/
+def K : Array Nat := span [92361, 20689, 346115, 14723]
 
 def parseRow (s : String) : Array Int :=
   ((s.splitOn " ").filter (· ≠ "")).toArray.map fun t => t.toInt?.getD 0
@@ -49,11 +68,11 @@ def parseRow (s : String) : Array Int :=
 def reps : Array (Array Int) :=
   ((d21RepsText.splitOn "\n").filter (· ≠ "")).toArray.map parseRow
 
-def newPoints : Array (Array Int) := reps.flatMap fun r => H.map (flip · r)
+def newPoints : Array (Array Int) := reps.flatMap fun r => K.map (flip · r)
 
 def rays : Array (Array Int) := base ++ newPoints
 
-/-- The 31 deleted points. -/
+/-- The 13 deleted points, as odd sign patterns on T. -/
 def deletedBase : Array (Array Int) := (oddSigns 21 Tmask).filter (deleted Tmask)
 
 end KissingCheck.D21
