@@ -1,9 +1,12 @@
 import KissingCheck.Basic
+import KissingCheck.D19Reps
 /-
-The 12268-point configuration in dimension 19, built from Ho's twelve
-generators. Coordinates of E are 1..20 in the generator lists and 0..19 as bits.
-Each ray is a positive multiple of the point described in the paper:
-base rays are scaled by 2, diagonal additions by 22, axis additions by 10.
+The 12270-point configuration in dimension 19, built from Ho's twelve
+generators, two restored base points, four sign generators and the 112
+representatives in `D19Reps.lean`. Coordinates of E are 1..20 in the
+generator lists and 0..19 as bits. Each ray is a positive multiple of the
+point described in the paper: base rays are scaled by 2, new rays are the
+integer vectors of the table.
 -/
 namespace KissingCheck.D19
 
@@ -39,41 +42,55 @@ def sumT (v : Array Int) : Int := v[0]! + v[3]! + v[6]! + v[8]!
 def native (v : Array Int) : Array Int :=
   (Hbits.map fun k => (2 : Int) * v[k]!).toArray ++ (Rmul v).toArray
 
-/-- Base: the points of Cohn–Li's C20 orthogonal to 1_T, minus those on the
-four octads that contain T. -/
-def base : Array (Array Int) :=
+/-- Core: the points of Cohn–Li's C20 orthogonal to 1_T, minus those on the
+four octads that contain T (10476 rays). -/
+def core : Array (Array Int) :=
   let rts := (roots 20).filter (sumT · == 0)
   let oct := (octads.filter (· &&& Tmask != Tmask)).flatMap fun o =>
     (oddSigns 20 o).filter (sumT · == 0)
   (rts ++ oct).map native
 
-/-- The span W of the five weight-4 words of E. -/
-def W : Array Nat := span ((E.filter (popcount · == 4)).toList)
+/-- The two restored points, in coordinates 1..20: the common head -1, 1, 1, 1
+on coordinates 3, 6, 8, 19 and ∓(1, 1, -1, -1) on T = (1, 4, 7, 9). Both lie on
+the octad T ∪ {3, 6, 8, 19}. -/
+def restored20 : List (List Int) := [
+  [-1, 0, -1, -1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+  [1, 0, -1, 1, 0, 1, -1, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]]
 
-/-- Keep c when c + (smallest word of c + W) is a sum of an even number of
-tetrads. The tetrads are disjoint, so that sum has weight divisible by 8. -/
-def keep (c : Nat) : Bool :=
-  let cmin := (W.map (c ^^^ ·)).foldl min c
-  popcount (c ^^^ cmin) % 8 == 0
+def restored : Array (Array Int) := (restored20.map fun v => native v.toArray).toArray
 
-def addition (c : Nat) : Array Int :=
-  let q := (Array.range 20).map (bitSign c)
-  let head := Hbits.map fun k => q[k]!
-  let tail := Rmul q
-  if popcount (c &&& Tmask) % 2 == 1 then
-    (head.map (22 * ·)).toArray ++ (tail.map (9 * ·)).toArray   -- λ = 9/11
-  else
-    (head.map (10 * ·)).toArray ++ (tail.map (7 * ·)).toArray   -- λ = 7/5
+/-- Base: the core plus the two restored points (10478 rays). -/
+def base : Array (Array Int) := core ++ restored
 
-def additions : Array (Array Int) :=
-  (E.filter fun c =>
-    let a := popcount (c &&& Tmask); 1 ≤ a && a ≤ 3 && keep c).map addition
+/-- Generators of the sign group G of order 16, as sets of coordinates in 1..20
+(all in H). -/
+def groupGens : List (List Nat) := [
+  [2, 5, 10, 11, 13, 15], [2, 5, 10, 16, 17, 20],
+  [2, 5, 12, 14, 15, 17], [2, 10, 13, 14, 16, 18]]
 
-def rays : Array (Array Int) := base ++ additions
+/-- A set of head coordinates as a mask on the 19 native coordinates
+(bit k is native coordinate k, which is `Hbits[k]`). -/
+def nativeMask (s : List Nat) : Nat :=
+  (List.range 16).foldl (fun acc k =>
+    if s.contains (Hbits[k]! + 1) then acc ||| (1 <<< k) else acc) 0
 
-/-- The 192 points of C20 ∩ 1_T^⊥ on the four octads that contain T. -/
+def G : Array Nat := span (groupGens.map nativeMask)
+
+def parseRow (s : String) : Array Int :=
+  ((s.splitOn " ").filter (· ≠ "")).toArray.map fun t => t.toInt?.getD 0
+
+def reps : Array (Array Int) :=
+  ((d19RepsText.splitOn "\n").filter (· ≠ "")).toArray.map parseRow
+
+/-- The 1792 new points: the 112 representatives under G. -/
+def newPoints : Array (Array Int) := reps.flatMap fun r => G.map (flip · r)
+
+def rays : Array (Array Int) := base ++ newPoints
+
+/-- The 190 points of C20 ∩ 1_T^⊥ on the four octads that contain T, other
+than the two restored points. -/
 def deletedBase : Array (Array Int) :=
-  ((octads.filter (· &&& Tmask == Tmask)).flatMap fun o =>
-    (oddSigns 20 o).filter (sumT · == 0)).map native
+  (((octads.filter (· &&& Tmask == Tmask)).flatMap fun o =>
+    (oddSigns 20 o).filter (sumT · == 0)).map native).filter (!restored.contains ·)
 
 end KissingCheck.D19
