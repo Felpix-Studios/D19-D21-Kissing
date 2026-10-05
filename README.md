@@ -50,9 +50,9 @@ Coordinates are the paper's: E is spanned by Ho's twelve generators with coordin
 |---|---|
 | `dimension`, `population` | 19 and 12270 |
 | `tetrad_T`, `fixed_tetrad` | T = {1,4,7,9} and {3,6,8,19}; the two restored points lie on the octad T ∪ {3,6,8,19} |
-| `restored_base_points` | the two restored points h ± (e₁+e₄−e₇−e₉), h = −e₃+e₆+e₈+e₁₉, in R²⁰ (`restored_base_points_native19`: the same in R¹⁹) |
-| `group_generators` | four generators of the sign group G of order 16, as sets of coordinates in 1..20 |
-| `representatives` | 112 integer vectors in R¹⁹; the 1792 new points are their images under G |
+| `restored_base_points` | the two restored points z ± (e₁+e₄−e₇−e₉), z = −e₃+e₆+e₈+e₁₉, in R²⁰ (`restored_base_points_native19`: the same in R¹⁹) |
+| `group_generators` | four generators of the code Γ ⊆ E whose sign changes form the group of order 16 (called G in the scripts and the Lean code), as sets of coordinates in 1..20 |
+| `representatives` | 112 integer vectors in R¹⁹; the 1792 new points are their images under the sign changes of Γ |
 | `auxiliary_margin` | 9999999/20000000 = 1/2 − 1/L with L = 2·10⁷, the bound on every cosine involving a new point |
 | `source` | the coordinate map from the producer's certificate |
 
@@ -70,7 +70,7 @@ The base itself (code, octads, roots, odd sign patterns) is not in the file; `ve
 
 The base (Golay code, octads, roots, odd sign patterns) is not in the file; the scripts and the Lean code rebuild it from the Golay polynomial, as described in the paper and in `constructions/D21-30779.txt`.
 
-Code names: in the scripts and the Lean code, H is Σ₀, K is Σ and T is the octad Q.
+Code names: in the D21 scripts and Lean code, H is Σ₀, K is Σ and T is the octad Q. In the D19 scripts and Lean code, G is the paper's Γ, and `core` is the 10476-point base of the 12268 construction.
 
 ## The Lean proof
 
