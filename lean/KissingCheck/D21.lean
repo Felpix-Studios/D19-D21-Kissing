@@ -25,21 +25,22 @@ def Tcoords : List Nat := [3, 6, 10, 11, 16, 18, 20, 21]
 def Tmask : Nat := mask1 Tcoords
 
 /-- The 13 deleted sign patterns on T, signs in the order of `Tcoords`
-(the `removed_base_representatives` of `data/D21_30779_certificate.json`). -/
+(the `removed_base_representatives` of `data/D21_30779_certificate.json`,
+in the same order). -/
 def deletedSigns : List (List Int) := [
-  [1, 1, -1, 1, 1, 1, 1, 1],
-  [1, -1, 1, -1, -1, 1, 1, 1],
-  [1, 1, 1, 1, 1, -1, 1, 1],
-  [1, 1, -1, -1, 1, 1, -1, 1],
-  [1, -1, 1, 1, -1, 1, -1, 1],
   [1, -1, -1, 1, -1, -1, -1, 1],
-  [1, 1, -1, -1, 1, 1, 1, -1],
-  [1, -1, 1, 1, -1, 1, 1, -1],
-  [1, 1, 1, -1, 1, -1, 1, -1],
   [1, -1, -1, 1, -1, -1, 1, -1],
-  [1, 1, -1, 1, 1, 1, -1, -1],
   [1, -1, 1, -1, -1, 1, -1, -1],
-  [1, 1, 1, 1, 1, -1, -1, -1]]
+  [1, -1, 1, -1, -1, 1, 1, 1],
+  [1, -1, 1, 1, -1, 1, -1, 1],
+  [1, -1, 1, 1, -1, 1, 1, -1],
+  [1, 1, -1, -1, 1, 1, -1, 1],
+  [1, 1, -1, -1, 1, 1, 1, -1],
+  [1, 1, -1, 1, 1, 1, -1, -1],
+  [1, 1, -1, 1, 1, 1, 1, 1],
+  [1, 1, 1, -1, 1, -1, 1, -1],
+  [1, 1, 1, 1, 1, -1, -1, -1],
+  [1, 1, 1, 1, 1, -1, 1, 1]]
 
 /-- The vector with the given signs on T and zeros elsewhere. -/
 def onT (s : List Int) : Array Int := Id.run do

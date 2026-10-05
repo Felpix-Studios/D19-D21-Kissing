@@ -29,7 +29,7 @@ Run from the repository root with Python 3.10 or later.
 ```bash
 python3 scripts/check_pairs.py data/D19_12268_rays.txt --n 19 --expect-rows 12268 --base-norm 24200   # about 10 s; last line CHECK PASS
 python3 scripts/verify_d21_orbits.py data/D21_30779_certificate.json                             # about 2 s; prints "verified": true
-python3 scripts/check_pairs.py data/D21_30779_rays.txt --n 21 --expect-rows 30779 --expect-gap-L       # about 1 min, 2 GB RAM; last line CHECK PASS
+python3 scripts/check_pairs.py data/D21_30779_rays.txt --n 21 --expect-rows 30779 --expect-gap-L       # about 1 min, 1.7 GB RAM; last line CHECK PASS
 python3 scripts/compare_with_witness.py                                                           # prints PASS
 ```
 
@@ -44,10 +44,8 @@ python3 scripts/compare_with_witness.py                                         
 | `dimension`, `population` | 21 and 30779 |
 | `generators` | the three generators of the order-8 group Σ₀ (bit j changes the sign of coordinate j+1) |
 | `representatives` | 384 integer vectors; the new points are their images under Σ₀. The last 192 are the images of the first 192 under the sign change w = 14723 (support {1,2,8,9,12,13,14}), so the same points are the first 192 under the order-16 group Σ = ⟨Σ₀, w⟩, as in the paper |
-| `removed_base_representatives` | the 13 deleted base points on the octad Q = {3,6,10,11,16,18,20,21} |
+| `removed_base_representatives` | the 13 deleted base points on the octad Q = {3,6,10,11,16,18,20,21}, in the paper's order |
 | `certified_auxiliary_gap_denominator` | L = 2·10⁸ in the bound cos ≤ 1/2 − 1/L |
-| `normalization` | each ray is divided by its own length |
-| `title`, `construction` | internal labels from when the file was made; they are not used |
 
 The base (Golay code, octads, roots, odd sign patterns) is not in the file; the scripts and the Lean code rebuild it from the Golay polynomial, as described in the paper and in `constructions/D21-30779.txt`.
 
@@ -71,7 +69,7 @@ Build, from `lean/`:
 ```bash
 cd lean
 lake exe cache get     # download Mathlib build files
-lake build             # about 3 minutes after the cache; prints the axioms of both theorems
+lake build             # a few minutes after the cache; prints the axioms of both theorems
 lake exe dumprays      # rewrites out/lean_rays_d19.txt and out/lean_rays_d21.txt
 lake exe checkall 19 21   # runs the same Boolean tests outside the proof
 ```
