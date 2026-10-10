@@ -17,8 +17,8 @@ example : compat 5 8 8 = false := by decide
 example : compat (10 ^ 9) (4 * 10 ^ 18 + 3) 1 = true := by decide
 example : compat (10 ^ 9) (4 * 10 ^ 18 - 1) 1 = false := by decide
 
-theorem d19_deleted_count : D19.deletedBase.size = 190 := by native_decide
-/-- Each of the 190 points still deleted conflicts with some new point. -/
+theorem d19_deleted_count : D19.deletedBase.size = 184 := by native_decide
+/-- Each of the 184 points still deleted conflicts with some new point. -/
 theorem d19_deleted_needed :
     D19.deletedBase.all (conflicts 19 D19.newPoints) = true := by native_decide
 

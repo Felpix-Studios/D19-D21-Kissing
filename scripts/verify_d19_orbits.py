@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
-"""Exact orbit-reduced check of the 12270-point D19 configuration, Python integers only.
+"""Exact orbit-reduced check of the 12276-point D19 configuration, Python integers only.
 
-Usage: python3 scripts/verify_d19_orbits.py data/D19_12270_certificate.json [--check-exports data/D19_12270_rays.txt]
+Usage: python3 scripts/verify_d19_orbits.py data/D19_12276_certificate.json [--check-exports data/D19_12276_rays.txt]
 
 No NumPy, optimizer or floating point. The code E (Ho's twelve generators with
 coordinate 20), the octads, the 10668-point section and the 192 points on the
 four octads containing T are rebuilt from the generators. The JSON supplies the
-two restored points, the generators of the sign group G and the 112
+eight restored points, the generators of the sign group G and the 14
 representatives, all in the paper's coordinates (T = {1,4,7,9}).
 
 Checks:
-  * the restored points lie on the deleted fiber of the octad T u {3,6,8,19};
-  * G has order 16, lies in E, vanishes on T and on {3,6,8,19}, maps the base
-    (10478 points) onto itself and fixes both restored points; on the other
-    144 deleted points its orbits have size 8;
+  * the restored points are the eight deleted points on the octad T u {3,6,8,19}
+    with v_T = (1,1,-1,-1), that is, with tail 2 f_1;
+  * G has order 128, lies in E, vanishes on T, contains no tetrad, maps the base
+    (10484 points) onto itself and the restored points onto themselves; all its
+    orbits on the 192 deleted points have size 8, and the restored points are one orbit;
   * every new point has the sign word of a kept word of the 12268 construction
     (head signs, and the tail pattern nearest to its tail);
-  * every product <r_i, b>, b in the base (112 x 10478), and every product
-    <r_i, S_g r_j>, i <= j, excluding i = j and g = 0 (16 C(112,2) + 15 112 = 101136),
-    satisfies cos <= 1/2 - 1/L, L = 2*10^7 (the JSON's auxiliary_margin);
-  * each of the 190 points still deleted has cosine above 1/2 with some new point.
-With --check-exports, the ray file must equal the 12270 built rays as a multiset.
+  * every product <r_i, b>, b in the base (14 x 10484), and every product
+    <r_i, S_g r_j>, i <= j, excluding i = j and g = 0 (128 C(14,2) + 127 14 = 13426),
+    satisfies cos <= 1/2 - 1/L, L = 50000 (the JSON's auxiliary_margin 24999/50000);
+  * each of the 184 points still deleted has cosine above 1/2 with some new point.
+With --check-exports, the ray file must equal the 12276 built rays as a multiset.
 """
 from __future__ import annotations
 import argparse, collections, itertools, json, math, time
@@ -98,26 +99,27 @@ def build(data):
     assert len(core) == 10476
     deleted = {p: o for o in full for p in fibers[o]}
     restored = [tuple(map(int, r)) for r in data['restored_base_points']]
-    assert len(restored) == 2
+    assert len(restored) == 8
     fixed_octad = Tm | mask(FIXED)
     assert fixed_octad in full
     for r in restored:
         assert len(r) == 20 and all(a in (-1, 0, 1) for a in r)
         assert native(r) in deleted and deleted[native(r)] == fixed_octad
     restored = [native(r) for r in restored]
-    assert restored[0] != restored[1]
+    assert len(set(restored)) == 8
+    assert set(restored) == {p for p, o in deleted.items() if o == fixed_octad and p[16:] == (2, 0, 0)}
     assert [list(r) for r in restored] == data['restored_base_points_native19']
     base = core + restored
-    assert len(set(base)) == 10478
+    assert len(set(base)) == 10484
     gens = [mask(g) for g in data['group_generators']]
     G = span(gens)
     Eset = set(E)
-    assert len(G) == 16 and all(g in Eset and g & (Tm | mask(FIXED)) == 0 for g in G)
+    assert len(G) == 128 and all(g in Eset and g & Tm == 0 and g.bit_count() != 4 for g in G)
     bset = set(base)
     assert all(flip(g, b) in bset for g in G for b in base)
-    assert all(flip(g, r) == r for g in G for r in restored)
+    assert {flip(g, restored[0]) for g in G} == set(restored)
     still = [p for p in deleted if p not in set(restored)]
-    assert len(still) == 190
+    assert len(still) == 184
     orbit_sizes = collections.Counter()
     seen = set()
     for p in still:
@@ -126,8 +128,9 @@ def build(data):
         orb = {flip(g, p) for g in G}
         seen |= orb
         orbit_sizes[(deleted[p] == fixed_octad, len(orb))] += 1
+    assert set(s for _, s in orbit_sizes) == {8}
     reps = [tuple(map(int, r)) for r in data['representatives']]
-    assert len(reps) == 112 and all(len(r) == 19 for r in reps)
+    assert len(reps) == 14 and all(len(r) == 19 for r in reps)
     assert all(type(a) is int for r in data['representatives'] for a in r)
     new = [flip(g, r) for r in reps for g in G]
     # sign words: the kept words of the 12268 construction
@@ -195,15 +198,15 @@ def verify(path, exports=None):
                 d = sum(-v if k < 16 and g >> (H[k] - 1) & 1 else v for k, v in enumerate(prod))
                 comparison(d, na, norms[j], 'representative-orbit', (i, j, g))
                 no += 1
-    assert nb == 112 * 10478 and no == 16 * math.comb(112, 2) + 15 * 112 == 101136
+    assert nb == 14 * 10484 and no == 128 * math.comb(14, 2) + 127 * 14 == 13426
     # each point still deleted conflicts with some new point
     conflicts = 0
     for p in b['still']:
         if any(dot(p, y) > 0 and 4 * dot(p, y) ** 2 > 8 * dot(y, y) for y in b['new']):
             conflicts += 1
-    assert conflicts == 190
+    assert conflicts == 184
     N = len(base) + len(b['new'])
-    assert N == 12270 == int(data['population'])
+    assert N == 12276 == int(data['population'])
     # The 492 roots of the base span R^19 (2e_i +- 2e_j for head pairs, and the tail roots).
     rejected = False
     try:
@@ -213,10 +216,10 @@ def verify(path, exports=None):
     assert rejected
     out = {
         'verified': True, 'dimension': 19, 'population': N,
-        'base': len(base), 'restored': 2, 'still_deleted': 190,
+        'base': len(base), 'restored': 8, 'still_deleted': 184,
         'new_points': len(b['new']), 'representatives': len(reps), 'group_order': len(G),
         'group_generators': data['group_generators'],
-        'G_orbits_on_deleted_points': {('fixed fiber' if f else 'other fibers') + f', size {s}': c
+        'G_orbits_on_deleted_points': {('fiber over T u {3,6,8,19}' if f else 'other fibers') + f', size {s}': c
                                        for (f, s), c in sorted(b['orbit_sizes'].items())},
         'new_point_sign_words': '1792 = the kept words of the 12268 construction',
         'representative_base_products': nb, 'representative_orbit_products': no,

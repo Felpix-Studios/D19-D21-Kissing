@@ -1,14 +1,10 @@
-/-
-The 14 integer representatives of the new points in the 19-dimensional
-construction: the `representatives` field of `data/D19_12276_certificate.json`,
-in order. Coordinates are the paper's 19 coordinates (the 16 head coordinates
-outside T = {1,4,7,9} in increasing order, then the three tail coordinates).
-The new points are their images under the order-128 sign group G of `D19.lean`.
-One representative per line, 19 integers.
--/
-namespace KissingCheck
+The lower bound for the kissing number in 19 dimensions is 12276.
 
-def d19RepsText : String := "
+The construction of this is as follows:
+
+Coordinates 1-20. E = binary span of {1,8,9,12,16,17,18,19}, {2,10,11,14,15,17,18,20}, {3,7,9,13,15,16,17,19}, {4,7,8,10,12,15,16,19}, {5,10,12,13,15,16,17,18}, {6,7,8,9,10,13,16,18}, {1,4,7,9}, {1,5,6,18,20}, {1,3,12,15,20}, {1,10,13,19,20}, {1,3,5,6,7,13,14,15,18,20}, {2,4,6,7,8,13,14,16,17,18}. T = (1,4,7,9), H = the rest. R rows: (1,1,-1,-1), (1,-1,1,-1), (1,-1,-1,1). Base: roots ±2ei±2ej and odd-sign ±1 vectors on weight-8 words of E⊥, with ΣvT = 0, minus those on words containing T, plus the 8 vectors y + e1+e4-e7-e9 with y = ±1 on {3,6,8,19} (0 elsewhere) and an odd number of minus signs: 10484 points, mapped to (vH, RvT/2). Add the images of the 14 integer vectors below (coordinates: H in increasing order, then the three tail coordinates) under the 128 sign changes of H spanned by {2,5,10,11,13,15}, {2,5,10,16,17,20}, {2,5,12,14,15,17}, {2,10,13,14,16,18}, {2,3,6,10,14,15}, {2,3,8,10,11,17}, {2,3,11,13,16,19}: 1792 points. The 14 vectors were found numerically. Normalize.
+
+The 14 vectors:
 1638 1638 -1638 -1638 -1638 1638 1638 -1638 1638 1638 -1638 1638 -1638 1638 1638 1638 -4588 0 0
 -1633 1633 1633 -1633 -1633 -1633 -1633 1633 1633 1633 -1633 1633 1633 1633 1633 1633 -102 -4616 1
 1633 1633 1633 -1633 -1633 -1633 1633 1635 1633 1633 1633 1635 -1633 1633 1633 1633 -101 0 4616
@@ -23,6 +19,3 @@ def d19RepsText : String := "
 1881 1881 1881 -1881 -1881 -1881 -1881 -1881 1881 1881 -1881 1881 -1881 1881 -1881 1881 -1568 1568 -1568
 -1859 1859 -1884 -1884 -1884 1884 1885 1857 1884 1859 -1857 1857 1884 1857 -1858 1885 1592 -1650 -1650
 1885 1885 -1885 -1858 -1858 1885 -1858 1856 1885 1885 1856 1856 -1885 1856 -1885 1858 1593 1649 1649
-"
-
-end KissingCheck

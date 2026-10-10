@@ -1,8 +1,8 @@
 import KissingCheck.Basic
 import KissingCheck.D19Reps
 /-
-The 12270-point configuration in dimension 19, built from Ho's twelve
-generators, two restored base points, four sign generators and the 112
+The 12276-point configuration in dimension 19, built from Ho's twelve
+generators, eight restored base points, seven sign generators and the 14
 representatives in `D19Reps.lean`. Coordinates of E are 1..20 in the
 generator lists and 0..19 as bits. Each ray is a positive multiple of the
 point described in the paper: base rays are scaled by 2, new rays are the
@@ -50,23 +50,30 @@ def core : Array (Array Int) :=
     (oddSigns 20 o).filter (sumT · == 0)
   (rts ++ oct).map native
 
-/-- The two restored points, in coordinates 1..20: the common head -1, 1, 1, 1
-on coordinates 3, 6, 8, 19 and ∓(1, 1, -1, -1) on T = (1, 4, 7, 9). Both lie on
-the octad T ∪ {3, 6, 8, 19}. -/
+/-- The eight restored points, in coordinates 1..20: (1, 1, -1, -1) on
+T = (1, 4, 7, 9) and the eight sign patterns with an odd number of minus signs
+on coordinates 3, 6, 8, 19. All lie on the octad T ∪ {3, 6, 8, 19}. -/
 def restored20 : List (List Int) := [
-  [-1, 0, -1, -1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-  [1, 0, -1, 1, 0, 1, -1, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]]
+  [1, 0, 1, 1, 0, 1, -1, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0],
+  [1, 0, 1, 1, 0, 1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+  [1, 0, 1, 1, 0, -1, -1, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+  [1, 0, 1, 1, 0, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0],
+  [1, 0, -1, 1, 0, 1, -1, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+  [1, 0, -1, 1, 0, 1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0],
+  [1, 0, -1, 1, 0, -1, -1, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0],
+  [1, 0, -1, 1, 0, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]]
 
 def restored : Array (Array Int) := (restored20.map fun v => native v.toArray).toArray
 
-/-- Base: the core plus the two restored points (10478 rays). -/
+/-- Base: the core plus the eight restored points (10484 rays). -/
 def base : Array (Array Int) := core ++ restored
 
-/-- Generators of the sign group G of order 16, as sets of coordinates in 1..20
+/-- Generators of the sign group G of order 128, as sets of coordinates in 1..20
 (all in H). -/
 def groupGens : List (List Nat) := [
   [2, 5, 10, 11, 13, 15], [2, 5, 10, 16, 17, 20],
-  [2, 5, 12, 14, 15, 17], [2, 10, 13, 14, 16, 18]]
+  [2, 5, 12, 14, 15, 17], [2, 10, 13, 14, 16, 18],
+  [2, 3, 6, 10, 14, 15], [2, 3, 8, 10, 11, 17], [2, 3, 11, 13, 16, 19]]
 
 /-- A set of head coordinates as a mask on the 19 native coordinates
 (bit k is native coordinate k, which is `Hbits[k]`). -/
@@ -82,13 +89,13 @@ def parseRow (s : String) : Array Int :=
 def reps : Array (Array Int) :=
   ((d19RepsText.splitOn "\n").filter (· ≠ "")).toArray.map parseRow
 
-/-- The 1792 new points: the 112 representatives under G. -/
+/-- The 1792 new points: the 14 representatives under G. -/
 def newPoints : Array (Array Int) := reps.flatMap fun r => G.map (flip · r)
 
 def rays : Array (Array Int) := base ++ newPoints
 
-/-- The 190 points of C20 ∩ 1_T^⊥ on the four octads that contain T, other
-than the two restored points. -/
+/-- The 184 points of C20 ∩ 1_T^⊥ on the four octads that contain T, other
+than the eight restored points. -/
 def deletedBase : Array (Array Int) :=
   (((octads.filter (· &&& Tmask == Tmask)).flatMap fun o =>
     (oddSigns 20 o).filter (sumT · == 0)).map native).filter (!restored.contains ·)

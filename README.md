@@ -2,7 +2,7 @@
 
 This repository accompanies the paper [`paper.pdf`](paper.pdf). It proves
 
-- τ₁₉ ≥ 12270 (best published bound 11948: B. S. Ho, arXiv:2603.10425),
+- τ₁₉ ≥ 12276 (best published bound 11948: B. S. Ho, arXiv:2603.10425),
 - τ₂₁ ≥ 30779 (best published bound 29768: H. Cohn and A. Li, arXiv:2411.04916).
 
 ## Contents
@@ -10,15 +10,16 @@ This repository accompanies the paper [`paper.pdf`](paper.pdf). It proves
 | path | what |
 |---|---|
 | `paper.pdf` | the paper |
-| `constructions/D19-12270.txt`, `constructions/D21-30779.txt` | short plain-text descriptions of the two constructions |
-| `data/D19_12270_rays.txt` | the 12270 points as integer rays: squared norm, then 19 integers per line |
-| `data/D19_12270_certificate.json` | compact D19 data (fields below) |
+| `constructions/D19-12276.txt`, `constructions/D21-30779.txt` | short plain-text descriptions of the two constructions (the D19 one includes the 14 representatives) |
+| `data/D19_12276_rays.txt` | the 12276 points as integer rays: squared norm, then 19 integers per line |
+| `data/D19_12276_certificate.json` | compact D19 data (fields below) |
 | `data/D19_12268_rays.txt` | the 12268-point configuration of the paper's Section 3.2, proved there by hand: squared norm, then 19 integers per line |
 | `data/D21_30779_rays.txt` | the 30779 points as integer rays: squared norm, then 21 integers per line |
 | `data/D21_30779_certificate.json` | compact D21 data (fields below) |
 | `scripts/verify_d19_orbits.py` | D19 check through the sign-group reduction (Python integers only) |
 | `scripts/verify_d21_orbits.py` | D21 check through the sign-group reduction (Python integers only) |
 | `scripts/check_pairs.py` | exact check of every pair of a ray file (needs NumPy); used for both dimensions |
+| `scripts/d19_structure.py` | prints the D19 structure facts quoted in the paper (the sign group, tail factors, margins) |
 | `scripts/d21_structure.py` | prints the D21 structure facts quoted in the paper (cosets, lines, weights) |
 | `scripts/compare_with_witness.py` | checks that the rays built in Lean equal the rays in `data/`, as directions |
 | `lean/` | Lean 4 + Mathlib formalization |
@@ -30,30 +31,30 @@ Each ray x stands for the unit vector x/|x|. A configuration is a kissing config
 Run from the repository root with Python 3.10 or later.
 
 ```bash
-python3 scripts/verify_d19_orbits.py data/D19_12270_certificate.json                             # about 2 s; prints "verified": true
-python3 scripts/check_pairs.py data/D19_12270_rays.txt --n 19 --expect-rows 12270 --gap-L 20000000 --expect-gap-L   # about 10 s; last line CHECK PASS
+python3 scripts/verify_d19_orbits.py data/D19_12276_certificate.json                             # about 3 s; prints "verified": true
+python3 scripts/check_pairs.py data/D19_12276_rays.txt --n 19 --expect-rows 12276 --gap-L 50000 --expect-gap-L   # about 10 s; last line CHECK PASS
 python3 scripts/check_pairs.py data/D19_12268_rays.txt --n 19 --expect-rows 12268 --base-norm 24200   # about 10 s; last line CHECK PASS
 python3 scripts/verify_d21_orbits.py data/D21_30779_certificate.json                             # about 2 s; prints "verified": true
 python3 scripts/check_pairs.py data/D21_30779_rays.txt --n 21 --expect-rows 30779 --expect-gap-L       # about 1 min, 1.7 GB RAM; last line CHECK PASS
 python3 scripts/compare_with_witness.py                                                           # prints PASS
 ```
 
-`check_pairs.py` tests every pair exactly. `--base-norm` is the squared norm of the base rays (8 in the 12270 and D21 files, 24200 = 8·55² in the 12268 file), used only to label pairs in the report. `--expect-gap-L` additionally requires every pair that involves a new point to satisfy cos ≤ 1/2 − 1/L, the bound proved in the paper: L = 2·10⁷ (`--gap-L 20000000`) for D19 and L = 2·10⁸ (the default) for D21. `verify_d19_orbits.py` uses the sign symmetry of the D19 configuration: it checks 101136 representative–orbit products and the products of the 112 representatives with the 10478 base points; with `--check-exports data/D19_12270_rays.txt` it also checks that the ray file is the same point set. `verify_d21_orbits.py` does the same for D21: 590976 representative–orbit products and the products of the 384 representatives with the 27707 base points.
+`check_pairs.py` tests every pair exactly. `--base-norm` is the squared norm of the base rays (8 in the 12276 and D21 files, 24200 = 8·55² in the 12268 file), used only to label pairs in the report. `--expect-gap-L` additionally requires every pair that involves a new point to satisfy cos ≤ 1/2 − 1/L, the bound proved in the paper: L = 50000 (`--gap-L 50000`) for D19 and L = 2·10⁸ (the default) for D21. `verify_d19_orbits.py` uses the sign symmetry of the D19 configuration: it checks 13426 representative–orbit products and the products of the 14 representatives with the 10484 base points; with `--check-exports data/D19_12276_rays.txt` it also checks that the ray file is the same point set. `verify_d21_orbits.py` does the same for D21: 590976 representative–orbit products and the products of the 384 representatives with the 27707 base points.
 
 `compare_with_witness.py` reads `lean/out/lean_rays_d19.txt` and `lean/out/lean_rays_d21.txt`. These are generated by the Lean project (below) and committed so that the comparison runs without Lean.
 
 ## The D19 certificate
 
-Coordinates are the paper's: E is spanned by Ho's twelve generators with coordinate 20 (`constructions/D19-12270.txt`), T = {1,4,7,9}, and a point v of R²⁰ with v₁+v₄+v₇+v₉ = 0 is written (v_H, R v_T / 2) in R¹⁹, with H the other 16 coordinates in increasing order.
+Coordinates are the paper's: E is spanned by Ho's twelve generators with coordinate 20 (`constructions/D19-12276.txt`), T = {1,4,7,9}, and a point v of R²⁰ with v₁+v₄+v₇+v₉ = 0 is written (v_H, R v_T / 2) in R¹⁹, with H the other 16 coordinates in increasing order.
 
 | field | meaning |
 |---|---|
-| `dimension`, `population` | 19 and 12270 |
-| `tetrad_T`, `fixed_tetrad` | T = {1,4,7,9} and {3,6,8,19}; the two restored points lie on the octad T ∪ {3,6,8,19} |
-| `restored_base_points` | the two restored points z ± (e₁+e₄−e₇−e₉), z = −e₃+e₆+e₈+e₁₉, in R²⁰ (`restored_base_points_native19`: the same in R¹⁹) |
-| `group_generators` | four generators of the code Γ ⊆ E whose sign changes form the group of order 16 (called G in the scripts and the Lean code), as sets of coordinates in 1..20 |
-| `representatives` | 112 integer vectors in R¹⁹; the 1792 new points are their images under the sign changes of Γ |
-| `auxiliary_margin` | 9999999/20000000 = 1/2 − 1/L with L = 2·10⁷, the bound on every cosine involving a new point |
+| `dimension`, `population` | 19 and 12276 |
+| `tetrad_T`, `restored_tetrad` | T = {1,4,7,9} and {3,6,8,19}; the eight restored points lie on the octad T ∪ {3,6,8,19} |
+| `restored_base_points` | the eight restored points y + e₁+e₄−e₇−e₉, y = ±1 on {3,6,8,19} with an odd number of minus signs, in R²⁰ (`restored_base_points_native19`: the same in R¹⁹, all with tail (2,0,0)) |
+| `group_generators` | seven generators of the code Γ ⊆ E whose sign changes form the group of order 128 (called G in the scripts and the Lean code), as sets of coordinates in 1..20 |
+| `representatives` | 14 integer vectors in R¹⁹; the 1792 new points are their images under the sign changes of Γ |
+| `auxiliary_margin` | 24999/50000 = 1/2 − 1/L with L = 50000, the bound on every cosine involving a new point |
 | `source` | the coordinate map from the producer's certificate |
 
 The base itself (code, octads, roots, odd sign patterns) is not in the file; `verify_d19_orbits.py` and the Lean code rebuild it from Ho's generators.
@@ -77,7 +78,7 @@ Code names: in the D21 scripts and Lean code, H is Σ₀, K is Σ and T is the o
 Lean 4.33.1 and Mathlib at tag `v4.33.1` (pinned in `lean/lake-manifest.json`). Install Lean with [elan](https://github.com/leanprover/elan); it reads `lean/lean-toolchain` and fetches the right version. The main theorems are `kissing_d19` and `kissing_d21` in `lean/KissingD19D21/D19.lean` and `D21.lean`:
 
 ```lean
-theorem kissing_d19 : ∃ S : Finset (EuclideanSpace ℝ (Fin 19)), S.card = 12270 ∧ IsKissingConfig S
+theorem kissing_d19 : ∃ S : Finset (EuclideanSpace ℝ (Fin 19)), S.card = 12276 ∧ IsKissingConfig S
 theorem kissing_d21 : ∃ S : Finset (EuclideanSpace ℝ (Fin 21)), S.card = 30779 ∧ IsKissingConfig S
 ```
 
